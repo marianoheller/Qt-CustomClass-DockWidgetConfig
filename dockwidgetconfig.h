@@ -18,6 +18,9 @@ typedef struct {
     QSpinBox *Spinbox;
     QDoubleSpinBox *DoubleSpinBox;
     bool isDouble;
+
+    QVBoxLayout *localVLayout;
+    QHBoxLayout *localHLayout;
 } itemDockWidgetConfig_t;
 
 typedef struct {
@@ -25,9 +28,6 @@ typedef struct {
     QFrame *SeparadorFrame;
     bool isTit;
     bool isSeparador;
-
-    QVBoxLayout *localVLayout;
-    QHBoxLayout *localHLayout;
 } tituloDockWidgetConfig_t;
 
 class DockWidgetConfig : public QDockWidget
@@ -36,12 +36,15 @@ class DockWidgetConfig : public QDockWidget
 public:
     DockWidgetConfig();
     ~DockWidgetConfig();
+    void toggleShowHide();
 
     ///ITEMS
     void setItems( QVector <itemDockWidgetConfig_t*> list);
     void addItem (itemDockWidgetConfig_t *item);
+    void addItem(QString nombre,int rangeMin, int rangeMax, int statingPoint);
+    void addItem(QString nombre,float rangeMin, float rangeMax, float statingPoint);
     QVector <itemDockWidgetConfig_t*> getItems();
-    itemDockWidgetConfig_t getItemAt(int index);
+    itemDockWidgetConfig_t* getItemAt(int index);
     int itemCount();
     void removeItemAt(int index);
     void removeItem(itemDockWidgetConfig_t* itemPtr);
@@ -61,6 +64,8 @@ private slots:
 private:
     QVector <itemDockWidgetConfig_t*> itemList;
     tituloDockWidgetConfig_t titulo;
+    QVBoxLayout *mainVLayout;
+    QGroupBox *mainGroupBox;
 };
 
 #endif // DOCKWIDGETCONFIG_H

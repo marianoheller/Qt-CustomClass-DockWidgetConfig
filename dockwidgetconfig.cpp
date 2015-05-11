@@ -5,10 +5,16 @@ DockWidgetConfig::DockWidgetConfig():
 {
     connect(this,SIGNAL(itemListChanged()),this,SLOT(handlerItemListChanged()));
 
-    titulo.TituloLabel=NULL;
-    titulo.SeparadorFrame=NULL;
+    titulo.SeparadorFrame = new QFrame();
+    titulo.SeparadorFrame->setFrameShape(QFrame::HLine);
+    titulo.TituloLabel = new QLabel();
     titulo.isTit=false;
     titulo.isSeparador=false;
+    mainVLayout = new QVBoxLayout();
+    mainGroupBox = new QGroupBox();
+
+    this->setWidget(mainGroupBox);
+    mainGroupBox->setLayout(mainVLayout);
 
     itemList.clear();
 }
@@ -21,7 +27,47 @@ DockWidgetConfig::~DockWidgetConfig()
 void DockWidgetConfig::addItem(itemDockWidgetConfig_t *item)
 {
     itemList.push_back(item);
-    emit itemListChanged;
+    emit itemListChanged();
+}
+
+void DockWidgetConfig::addItem(QString nombre, int rangeMin, int rangeMax, int statingPoint)
+{
+    itemDockWidgetConfig_t *item = new itemDockWidgetConfig_t;
+    item->Titulo = new QLabel(nombre);
+    item->Slider = new QSlider( Qt::Horizontal);
+    item->Slider->setRange(rangeMin,rangeMax);
+    item->Slider->setSliderPosition(statingPoint);
+    item->DoubleSpinBox=NULL;
+    item->isDouble = false;
+    item->Spinbox = new QSpinBox();
+    item->Spinbox->setRange(rangeMin,rangeMax);
+    item->Spinbox->setValue(statingPoint);
+
+    item->localHLayout = new QHBoxLayout();
+    item->localVLayout = new QVBoxLayout();
+
+    itemList.push_back(item);
+    emit itemListChanged();
+}
+
+void DockWidgetConfig::addItem(QString nombre, float rangeMin, float rangeMax, float statingPoint)
+{
+    itemDockWidgetConfig_t *item = new itemDockWidgetConfig_t;
+    item->Titulo = new QLabel(nombre);
+    item->Slider = new QSlider( Qt::Horizontal );
+    item->Slider->setRange(rangeMin,rangeMax);
+    item->Slider->setSliderPosition(statingPoint);
+    item->Spinbox=NULL;
+    item->isDouble = true;
+    item->DoubleSpinBox = new QDoubleSpinBox();
+    item->DoubleSpinBox->setRange(rangeMin,rangeMax);
+    item->DoubleSpinBox->setValue(statingPoint);
+
+    item->localHLayout = new QHBoxLayout();
+    item->localVLayout = new QVBoxLayout();
+
+    itemList.push_back(item);
+    emit itemListChanged();
 }
 
 
@@ -29,28 +75,28 @@ void DockWidgetConfig::setItems(QVector<itemDockWidgetConfig_t *> list)
 {
     itemList.clear();
     itemList = list;
-    emit itemListChanged;
+    emit itemListChanged();
 }
 
 void DockWidgetConfig::removeItemAt(int index)
 {
     itemList.removeAt(index);
-    emit itemListChanged;
+    emit itemListChanged();
 }
 
 void DockWidgetConfig::removeItem(itemDockWidgetConfig_t *itemPtr)
 {
     itemList.removeOne(itemPtr);
-    emit itemListChanged;
+    emit itemListChanged();
 }
 
 void DockWidgetConfig::clearItems()
 {
     itemList.clear();
-    emit itemListChanged;
+    emit itemListChanged();
 }
 
-void DockWidgetConfig::indexOf(itemDockWidgetConfig_t *itemPtr)
+int DockWidgetConfig::indexOf(itemDockWidgetConfig_t *itemPtr)
 {
     return itemList.indexOf(itemPtr);
 }
@@ -74,13 +120,33 @@ int DockWidgetConfig::itemCount()
 void DockWidgetConfig::handlerItemListChanged()
 {
 
-
+    //Titulo
+    if (titulo.isTit)
+    {
+        mainVLayout->addWidget(titulo.TituloLabel);
+    }
+    if (titulo.isSeparador)
+    {
+        mainVLayout->addWidget(titulo.SeparadorFrame);
+    }
+    //Items
+    for (int i=0;i< itemList.size() ; i++)
+    {
+        itemList.at(i)->localVLayout->addWidget(itemList.at(i)->Titulo);
+        itemList.at(i)->localHLayout->addWidget(itemList.at(i)->Slider);
+        if (itemList.at(i)->isDouble)
+            itemList.at(i)->localHLayout->addWidget(itemList.at(i)->DoubleSpinBox);
+        else
+            itemList.at(i)->localHLayout->addWidget(itemList.at(i)->Spinbox);
+        itemList.at(i)->localVLayout->addLayout(itemList.at(i)->localHLayout);
+    }
 }
 
 
 void DockWidgetConfig::setTitulo(QString tit)
 {
     titulo.TituloLabel->setText(tit);
+    titulo.isTit = true;
 }
 
 QString DockWidgetConfig::getTitulo()
@@ -91,4 +157,13 @@ QString DockWidgetConfig::getTitulo()
 void DockWidgetConfig::setSeparador(bool isSep)
 {
     titulo.isSeparador=isSep;
+}
+
+
+void DockWidgetConfig::toggleShowHide()
+{
+    if (this->isHidden())
+        this->show();
+    else
+        this->hide();
 }
