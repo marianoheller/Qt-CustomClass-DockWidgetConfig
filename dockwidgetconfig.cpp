@@ -74,6 +74,7 @@ int DockWidgetConfig::itemCount()
 void DockWidgetConfig::handlerItemListChanged()
 {
 
+
 }
 
 
