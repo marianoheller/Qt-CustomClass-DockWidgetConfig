@@ -12,17 +12,47 @@ DockWidgetConfig::DockWidgetConfig():
     titulo.isSeparador=false;
     mainVLayout = new QVBoxLayout();
     mainGroupBox = new QGroupBox();
-
-    this->setWidget(mainGroupBox);
+    lastSpacer = new QSpacerItem(10,10,QSizePolicy::Maximum,QSizePolicy::Expanding);
     mainGroupBox->setLayout(mainVLayout);
+    this->setWidget(mainGroupBox);
+    mainVLayout->addSpacerItem(lastSpacer);
+
+/*
+    //DEBUG
+    QLabel *aux = new QLabel("WOOYYYYYYYYYYYYY");
+    QSpinBox *aux2 = new QSpinBox();
+    QHBoxLayout *layaux = new QHBoxLayout();
+    layaux->addWidget(aux2);
+    layaux->addWidget(aux);
+    mainVLayout->addLayout(layaux);
+*/
 
     itemList.clear();
 }
 
 DockWidgetConfig::~DockWidgetConfig()
 {
-
+    for (int i=0;i< itemList.size() ; i++)
+    {
+        itemDockWidgetConfig_t *aux = itemList.at(i);
+        delete aux->DoubleSpinBox;
+        delete aux->localHLayout;
+        delete aux->localVLayout;
+        delete aux->Slider;
+        delete aux->Spinbox;
+        delete aux->Titulo;
+        delete aux;
+    }
+    itemList.clear();
+    delete lastSpacer;
+    delete titulo.SeparadorFrame;
+    delete titulo.TituloLabel;
 }
+/*
+QSize DockWidgetConfig::sizeHint () const
+{
+    return QSize(10,10);
+}*/
 
 void DockWidgetConfig::addItem(itemDockWidgetConfig_t *item)
 {
@@ -119,8 +149,27 @@ int DockWidgetConfig::itemCount()
 
 void DockWidgetConfig::handlerItemListChanged()
 {
+    //remove current layouts & items
+    for (int i=0;i< itemList.size() ; i++)
+    {
+        itemDockWidgetConfig_t *aux = itemList.at(i);
+        aux->localHLayout->removeWidget(aux->Slider);
+        if (aux->isDouble)
+            aux->localHLayout->removeWidget(aux->DoubleSpinBox);
+        else
+            aux->localHLayout->removeWidget(aux->Spinbox);
+        aux->localVLayout->removeWidget(aux->Titulo);
+        aux->localVLayout->removeItem(aux->localHLayout);
+        mainVLayout->removeItem(aux->localVLayout);
+    }
+    if (titulo.isTit)
+        mainVLayout->removeWidget(titulo.TituloLabel);
+    if (titulo.isSeparador)
+        mainVLayout->removeWidget(titulo.SeparadorFrame);
+    while (mainVLayout->takeAt(0));//este ultimo para borrar el spacer que no se como se hace xq no es qwidget
 
-    //Titulo
+
+    //Set Titulo
     if (titulo.isTit)
     {
         mainVLayout->addWidget(titulo.TituloLabel);
@@ -129,7 +178,7 @@ void DockWidgetConfig::handlerItemListChanged()
     {
         mainVLayout->addWidget(titulo.SeparadorFrame);
     }
-    //Items
+    //Set Items
     for (int i=0;i< itemList.size() ; i++)
     {
         itemList.at(i)->localVLayout->addWidget(itemList.at(i)->Titulo);
@@ -139,7 +188,10 @@ void DockWidgetConfig::handlerItemListChanged()
         else
             itemList.at(i)->localHLayout->addWidget(itemList.at(i)->Spinbox);
         itemList.at(i)->localVLayout->addLayout(itemList.at(i)->localHLayout);
+        mainVLayout->addLayout(itemList.at(i)->localVLayout);
     }
+    //&& last spacer
+    mainVLayout->addSpacerItem(lastSpacer);
 }
 
 

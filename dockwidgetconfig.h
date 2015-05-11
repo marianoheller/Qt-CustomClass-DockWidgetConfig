@@ -36,6 +36,7 @@ class DockWidgetConfig : public QDockWidget
 public:
     DockWidgetConfig();
     ~DockWidgetConfig();
+    //virtual QSize sizeHint () const;
     void toggleShowHide();
 
     ///ITEMS
@@ -66,6 +67,7 @@ private:
     tituloDockWidgetConfig_t titulo;
     QVBoxLayout *mainVLayout;
     QGroupBox *mainGroupBox;
+    QSpacerItem *lastSpacer;
 };
 
 #endif // DOCKWIDGETCONFIG_H
