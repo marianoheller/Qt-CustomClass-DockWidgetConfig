@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dockWidget = new DockWidgetConfig();
     dockWidget->hide();
     dockWidget->setTitulo("Modificacion de imagenes.\nasdasdasd");
+    dockWidget->setWindowTitle("asd");
     dockWidget->addItem("Brillo",-100,100,0);
     dockWidget->addItem("QWEQWE",-100,300,200);
     this->addDockWidget(Qt::RightDockWidgetArea,dockWidget);

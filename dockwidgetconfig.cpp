@@ -106,6 +106,18 @@ void DockWidgetConfig::addItem(QString nombre, float rangeMin, float rangeMax, f
 
 void DockWidgetConfig::setItems(QVector<itemDockWidgetConfig_t *> list)
 {
+    for (int i=0;i< itemList.size() ; i++)
+    {
+        itemDockWidgetConfig_t *aux = itemList.at(i);
+
+        delete aux->DoubleSpinBox;
+        delete aux->localHLayout;
+        delete aux->localVLayout;
+        delete aux->Slider;
+        delete aux->Spinbox;
+        delete aux->Titulo;
+        delete aux;
+    }
     itemList.clear();
     itemList = list;
     emit itemListChanged();
@@ -113,18 +125,45 @@ void DockWidgetConfig::setItems(QVector<itemDockWidgetConfig_t *> list)
 
 void DockWidgetConfig::removeItemAt(int index)
 {
+    itemDockWidgetConfig_t *auxItem = itemList.at(index);
     itemList.removeAt(index);
+
+    delete auxItem->Slider;
+    delete auxItem->Spinbox;
+    delete auxItem->Titulo;
+    delete auxItem->DoubleSpinBox;
+    delete auxItem->localHLayout;
+    delete auxItem->localVLayout;
     emit itemListChanged();
 }
 
 void DockWidgetConfig::removeItem(itemDockWidgetConfig_t *itemPtr)
 {
     itemList.removeOne(itemPtr);
+    itemDockWidgetConfig_t *auxItem = itemPtr;
+    delete auxItem->Slider;
+    delete auxItem->Spinbox;
+    delete auxItem->Titulo;
+    delete auxItem->DoubleSpinBox;
+    delete auxItem->localHLayout;
+    delete auxItem->localVLayout;
     emit itemListChanged();
 }
 
 void DockWidgetConfig::clearItems()
 {
+    for (int i=0;i< itemList.size() ; i++)
+    {
+        itemDockWidgetConfig_t *aux = itemList.at(i);
+
+        delete aux->DoubleSpinBox;
+        delete aux->localHLayout;
+        delete aux->localVLayout;
+        delete aux->Slider;
+        delete aux->Spinbox;
+        delete aux->Titulo;
+        delete aux;
+    }
     itemList.clear();
     emit itemListChanged();
 }
@@ -156,6 +195,13 @@ void DockWidgetConfig::handlerItemListChanged()
     for (int i=0;i< itemList.size() ; i++)
     {
         itemDockWidgetConfig_t *aux = itemList.at(i);
+        //tema signals:desconecto todo, total desp se vuelven a conectar
+        if (aux->isDouble)
+            aux->DoubleSpinBox->disconnect();
+        else
+            aux->Spinbox->disconnect();
+        aux->Slider->disconnect();
+
         aux->localHLayout->removeWidget(aux->Slider);
         if (aux->isDouble)
             aux->localHLayout->removeWidget(aux->DoubleSpinBox);
@@ -170,8 +216,7 @@ void DockWidgetConfig::handlerItemListChanged()
     if (titulo.isSeparador)
         mainVLayout->removeWidget(titulo.SeparadorFrame);
     while (mainVLayout->takeAt(0));//este ultimo para borrar el spacer que no se como se hace xq no es qwidget
-    //Remove mappings
-    //sigMapItemParamChanged->removeMappings();
+
 
 
     //Set Titulo
@@ -183,7 +228,7 @@ void DockWidgetConfig::handlerItemListChanged()
     {
         mainVLayout->addWidget(titulo.SeparadorFrame);
     }
-    //Set Items & mappings
+    //Set Items & connections
     for (int i=0;i< itemList.size() ; i++)
     {
         itemList.at(i)->localVLayout->addWidget(itemList.at(i)->Titulo);
@@ -208,7 +253,8 @@ void DockWidgetConfig::handlerItemListChanged()
                 QString id = QString::number(i) + "," + QString::number(arg);
                 emit itemParamChanged(id);
             } );
-
+            connect(itemList.at(i)->Slider,SIGNAL(valueChanged(int)),itemList.at(i)->DoubleSpinBox,SLOT(setValue(double)));
+            connect(itemList.at(i)->DoubleSpinBox,SIGNAL(valueChanged(double)),itemList.at(i)->Slider,SLOT(setValue(int)));
         }
         else
         {
@@ -217,8 +263,9 @@ void DockWidgetConfig::handlerItemListChanged()
                 QString id = QString::number(i) + "," + QString::number(arg);
                 emit itemParamChanged(id);
             } );
+            connect(itemList.at(i)->Slider,SIGNAL(valueChanged(int)),itemList.at(i)->Spinbox,SLOT(setValue(int)));
+            connect(itemList.at(i)->Spinbox,SIGNAL(valueChanged(int)),itemList.at(i)->Slider,SLOT(setValue(int)));
         }
-
     }
     //&& last spacer
     mainVLayout->addSpacerItem(lastSpacer);
