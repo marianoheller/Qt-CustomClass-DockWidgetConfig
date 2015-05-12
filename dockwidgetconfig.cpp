@@ -32,6 +32,7 @@ DockWidgetConfig::DockWidgetConfig():
 
 DockWidgetConfig::~DockWidgetConfig()
 {
+
     for (int i=0;i< itemList.size() ; i++)
     {
         itemDockWidgetConfig_t *aux = itemList.at(i);
@@ -44,10 +45,12 @@ DockWidgetConfig::~DockWidgetConfig()
         delete aux;
     }
     itemList.clear();
-    delete lastSpacer;
+    //delete lastSpacer; //no se puede deletear lastSpacer. No se xq. Causa un CoC (crash on closing)
     delete titulo.SeparadorFrame;
     delete titulo.TituloLabel;
 }
+
+
 /*
 QSize DockWidgetConfig::sizeHint () const
 {
@@ -167,6 +170,8 @@ void DockWidgetConfig::handlerItemListChanged()
     if (titulo.isSeparador)
         mainVLayout->removeWidget(titulo.SeparadorFrame);
     while (mainVLayout->takeAt(0));//este ultimo para borrar el spacer que no se como se hace xq no es qwidget
+    //Remove mappings
+    //sigMapItemParamChanged->removeMappings();
 
 
     //Set Titulo
@@ -178,7 +183,7 @@ void DockWidgetConfig::handlerItemListChanged()
     {
         mainVLayout->addWidget(titulo.SeparadorFrame);
     }
-    //Set Items
+    //Set Items & mappings
     for (int i=0;i< itemList.size() ; i++)
     {
         itemList.at(i)->localVLayout->addWidget(itemList.at(i)->Titulo);
@@ -189,6 +194,31 @@ void DockWidgetConfig::handlerItemListChanged()
             itemList.at(i)->localHLayout->addWidget(itemList.at(i)->Spinbox);
         itemList.at(i)->localVLayout->addLayout(itemList.at(i)->localHLayout);
         mainVLayout->addLayout(itemList.at(i)->localVLayout);
+
+        void (QSlider:: *slideValueChanged) (int) = &QSlider::valueChanged;
+        connect(itemList.at(i)->Slider,slideValueChanged,[this,i](int arg) {
+            QString id = QString::number(i) + "," + QString::number(arg);
+            emit itemParamChanged(id);
+        } );
+
+        if (itemList.at(i)->isDouble)
+        {
+            void (QDoubleSpinBox:: *dSpinValueChanged) (double) = &QDoubleSpinBox::valueChanged;
+            connect(itemList.at(i)->DoubleSpinBox,dSpinValueChanged,[this,i](double arg) {
+                QString id = QString::number(i) + "," + QString::number(arg);
+                emit itemParamChanged(id);
+            } );
+
+        }
+        else
+        {
+            void (QSpinBox:: *spinValueChanged) (int) = &QSpinBox::valueChanged;
+            connect(itemList.at(i)->Spinbox,spinValueChanged,[this,i](int arg) {
+                QString id = QString::number(i) + "," + QString::number(arg);
+                emit itemParamChanged(id);
+            } );
+        }
+
     }
     //&& last spacer
     mainVLayout->addSpacerItem(lastSpacer);

@@ -11,6 +11,8 @@
 #include <QGroupBox>
 #include <QSpacerItem>
 #include <QFrame>
+#include <QSignalMapper>
+
 
 typedef struct {
     QLabel *Titulo;
@@ -58,9 +60,11 @@ public:
     void setSeparador(bool isSep);
 signals:
     itemListChanged();
+    itemParamChanged(QString id);
 
 private slots:
     void handlerItemListChanged();
+    //void handlerMapItemParamChanged(QString);
 
 private:
     QVector <itemDockWidgetConfig_t*> itemList;

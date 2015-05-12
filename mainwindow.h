@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QDebug>
 #include "dockwidgetconfig.h"
 
 namespace Ui {
@@ -18,6 +19,7 @@ public:
 
 private slots:
     void on_pushButton_clicked();
+    void handlerItemParamChanged(QString id);
 
 private:
     Ui::MainWindow *ui;
